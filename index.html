@@ -3,132 +3,168 @@
 <head>
   <meta charset="utf-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover" />
-  <meta name="theme-color" content="#6f1832" />
-  <meta name="description" content="НЕ ГАДАЙ — ЛЕТИ. Вечный тревел-оракул от Tatakomotako." />
+  <meta name="theme-color" content="#65172d" />
+  <meta name="description" content="НЕ ГАДАЙ — ЛЕТИ. Тревел-оракул от Tatakomotako." />
   <title>НЕ ГАДАЙ — ЛЕТИ · Tatakomotako</title>
   <link rel="manifest" href="./manifest.webmanifest" />
   <link rel="icon" href="./icon.svg" type="image/svg+xml" />
   <link rel="apple-touch-icon" href="./apple-touch-icon.png" />
-  <link rel="stylesheet" href="./styles.css" />
+  <link rel="stylesheet" href="./styles.css?v=20" />
 </head>
 <body>
+  <div class="ambient" aria-hidden="true"><span></span><span></span><span></span></div>
   <div class="grain" aria-hidden="true"></div>
+
   <main class="app-shell">
     <header class="topbar">
       <button class="brand" data-action="home" aria-label="На главную">
-        <span class="brand-mark">✦</span>
-        <span>НЕ ГАДАЙ — ЛЕТИ</span>
+        <span class="brand-star">✦</span><span>НЕ ГАДАЙ — ЛЕТИ</span>
       </button>
-      <button class="icon-btn" data-action="open-saved" aria-label="Сохранённые карты" title="Сохранённые карты">♡</button>
+      <button class="saved-trigger" data-action="open-saved" aria-label="Сохранённые карты"><span>♡</span></button>
     </header>
 
-    <section id="screen-home" class="screen active" aria-labelledby="hero-title">
-      <div class="hero">
-        <div class="eyebrow">TRAVEL ORACLE · BY TATAKOMOTAKO</div>
-        <h1 id="hero-title">Не гадай.<br><em>Лети.</em></h1>
-        <p class="hero-copy">Колода, которая не выбирает отпуск за тебя. Она помогает услышать, чего тебе хочется прямо сейчас.</p>
-        <div class="hero-symbol" aria-hidden="true">↗</div>
+    <section id="screen-home" class="screen active">
+      <div class="hero-grid">
+        <div class="hero-copy-wrap">
+          <div class="eyebrow">TRAVEL ORACLE · TATAKOMOTAKO</div>
+          <h1>Не гадай.<br><em>Лети.</em></h1>
+          <p class="lead">Иногда отпуск выбирает тебя раньше, чем ты выбираешь его. Вытяни знак и послушай, что откликнется.</p>
+          <div class="hero-actions">
+            <button class="primary-btn xl" data-action="sign">Получить знак <span>→</span></button>
+            <div class="sub-actions">
+              <button class="ghost-btn" data-action="daily">Карта дня</button>
+              <button class="ghost-btn" data-action="helper">Помощь с отпуском</button>
+            </div>
+          </div>
+          <p class="ritual-note">Без нумерации и «правильных» ответов. Выбираешь карту сама — смысл забираешь тот, который оказался твоим.</p>
+        </div>
+        <button class="hero-card-button" data-action="sign" aria-label="Получить знак">
+          <span class="hero-card-shadow"></span>
+          <span class="card-back hero-card-back">
+            <span class="back-frame"></span>
+            <span class="back-orbit orbit-a"></span>
+            <span class="back-orbit orbit-b"></span>
+            <span class="back-compass">✦</span>
+            <span class="back-word">TATAKOMOTAKO</span>
+          </span>
+          <span class="tap-hint">коснись карты</span>
+        </button>
       </div>
 
-      <div class="home-actions">
-        <button class="big-choice" data-action="daily">
-          <span class="big-choice-icon">☀</span>
-          <span class="big-choice-text"><strong>Карта дня</strong><small>Один знак до завтра</small></span>
-          <span class="arrow">→</span>
-        </button>
-        <button class="big-choice accent" data-action="helper">
-          <span class="big-choice-icon">✈</span>
-          <span class="big-choice-text"><strong>Помощь с отпуском</strong><small>Расклад под твой вопрос</small></span>
-          <span class="arrow">→</span>
-        </button>
-        <button class="text-action" data-action="surprise">🎲 Удиви меня</button>
-      </div>
-
-      <div class="microcopy">Можно пользоваться снова и снова. Здесь нет «правильных» ответов — только повод лучше понять себя.</div>
+      <div class="home-divider"><span>или спроси точнее</span></div>
+      <button class="surprise-banner" data-action="surprise">
+        <span class="surprise-icon">✺</span>
+        <span><strong>Удиви меня</strong><small>Не выбирай вопрос. Иногда ответ приходит раньше него.</small></span>
+        <span class="surprise-arrow">→</span>
+      </button>
     </section>
 
-    <section id="screen-modes" class="screen" aria-labelledby="modes-title">
+    <section id="screen-ritual" class="screen">
+      <div class="screen-head ritual-head">
+        <button class="round-btn" id="ritual-back" data-action="home" aria-label="Назад">←</button>
+        <div>
+          <div id="ritual-eyebrow" class="eyebrow">ТВОЙ ЗНАК</div>
+          <h2 id="ritual-title">Выбери карту</h2>
+        </div>
+      </div>
+      <div class="focus-copy" id="ritual-copy">На пару секунд забудь про цены, даты и «куда все ездят». Подумай, чего тебе хочется на самом деле.</div>
+      <div class="ritual-progress" id="ritual-progress"></div>
+      <div class="deck-picker" id="deck-picker" aria-label="Выбери одну карту"></div>
+      <p class="deck-caption">Не ищи правильную. Нажми на ту, к которой первой потянулась рука.</p>
+    </section>
+
+    <section id="screen-modes" class="screen">
       <div class="screen-head">
-        <button class="back-btn" data-action="home">←</button>
-        <div><div class="eyebrow">ПОМОЩЬ С ОТПУСКОМ</div><h2 id="modes-title">Что хочешь спросить?</h2></div>
+        <button class="round-btn" data-action="home" aria-label="Назад">←</button>
+        <div><div class="eyebrow">ПОМОЩЬ С ОТПУСКОМ</div><h2>О чём спросим путешествие?</h2></div>
       </div>
       <div id="mode-list" class="mode-list"></div>
     </section>
 
-    <section id="screen-compare" class="screen" aria-labelledby="compare-title">
+    <section id="screen-compare" class="screen">
       <div class="screen-head">
-        <button class="back-btn" data-action="helper">←</button>
-        <div><div class="eyebrow">ДВА ВАРИАНТА</div><h2 id="compare-title">Между чем выбираем?</h2></div>
+        <button class="round-btn" data-action="helper" aria-label="Назад">←</button>
+        <div><div class="eyebrow">ДВА ВАРИАНТА</div><h2>Между чем выбираем?</h2></div>
       </div>
       <form id="compare-form" class="form-card">
-        <label>Вариант A<input id="compare-a" maxlength="36" placeholder="Например, Пхукет" required /></label>
-        <label>Вариант B<input id="compare-b" maxlength="36" placeholder="Например, Вьетнам" required /></label>
-        <button class="primary-btn" type="submit">Разложить карты →</button>
+        <label><span>Вариант A</span><input id="compare-a" maxlength="42" placeholder="Например, Пхукет" required /></label>
+        <label><span>Вариант B</span><input id="compare-b" maxlength="42" placeholder="Например, Вьетнам" required /></label>
+        <button class="primary-btn" type="submit">Начать расклад <span>→</span></button>
       </form>
-      <p class="note">Оракул не решает за тебя. Он показывает, на что посмотреть в каждом варианте.</p>
+      <p class="soft-note">Оракул не выберет победителя. Он покажет характер каждого варианта и то, что важно проверить.</p>
     </section>
 
-    <section id="screen-couple" class="screen" aria-labelledby="couple-title">
+    <section id="screen-couple" class="screen">
       <div class="screen-head">
-        <button class="back-btn" data-action="helper">←</button>
-        <div><div class="eyebrow">ЕДЕМ ВДВОЁМ</div><h2 id="couple-title">Как вас подписать?</h2></div>
+        <button class="round-btn" data-action="helper" aria-label="Назад">←</button>
+        <div><div class="eyebrow">ЕДЕМ ВДВОЁМ</div><h2>Кто едет?</h2></div>
       </div>
       <form id="couple-form" class="form-card">
-        <label>Ты<input id="couple-a" maxlength="24" placeholder="Например, Я" value="Я" required /></label>
-        <label>Второй путешественник<input id="couple-b" maxlength="24" placeholder="Например, Муж" value="Мой человек" required /></label>
-        <button class="primary-btn" type="submit">Искать компромисс →</button>
+        <label><span>Ты</span><input id="couple-a" maxlength="28" value="Я" required /></label>
+        <label><span>Второй путешественник</span><input id="couple-b" maxlength="28" value="Мой человек" required /></label>
+        <button class="primary-btn" type="submit">Начать расклад <span>→</span></button>
       </form>
     </section>
 
-    <section id="screen-result" class="screen" aria-labelledby="result-title">
+    <section id="screen-result" class="screen">
       <div class="screen-head result-head">
-        <button class="back-btn" id="result-back" data-action="home">←</button>
-        <div><div id="result-eyebrow" class="eyebrow">ТВОЙ РАСКЛАД</div><h2 id="result-title">Вот что выпало</h2></div>
+        <button class="round-btn" id="result-back" data-action="home" aria-label="Назад">←</button>
+        <div><div id="result-eyebrow" class="eyebrow">ТВОЙ ЗНАК</div><h2 id="result-title">Вот что открылось</h2></div>
       </div>
 
-      <div id="daily-lock" class="daily-lock hidden">Эта карта останется твоей до завтра ✦</div>
-      <div id="cards-stage" class="cards-stage"></div>
-      <div id="interpretation" class="interpretation hidden"></div>
-      <div id="destination-block" class="destination-block hidden"></div>
+      <div id="daily-lock" class="daily-lock hidden">До завтра это твоя карта. Она не меняется ✦</div>
+      <div id="rare-banner" class="rare-banner hidden"><span>✦</span> РЕДКИЙ ЗНАК <span>✦</span></div>
+      <div id="result-stage" class="result-stage"></div>
 
       <div class="result-actions">
-        <button class="secondary-btn" data-action="save-current">♡ Сохранить карты</button>
-        <button class="secondary-btn" data-action="share-current">↗ Поделиться</button>
-        <button class="secondary-btn" data-action="download-current">↓ Скачать сторис</button>
+        <button class="action-pill" data-action="save-current">♡ Сохранить</button>
+        <button class="action-pill" data-action="share-current">↗ Поделиться</button>
+        <button class="action-pill" data-action="download-current">↓ Сторис</button>
       </div>
-      <button id="redraw-btn" class="text-action hidden" data-action="redraw">Давай ещё →</button>
+
+      <button id="redraw-btn" class="again-btn hidden" data-action="redraw">Спросить ещё раз →</button>
 
       <div class="cta-card">
-        <span class="cta-kicker">Хочешь не знак, а реальные варианты?</span>
-        <strong>Tatakomotako подберёт отпуск под даты, бюджет и твой характер.</strong>
-        <a class="primary-btn link-btn" href="https://instagram.com/tatakomotako" target="_blank" rel="noopener">Написать @tatakomotako ↗</a>
+        <div class="cta-orbit" aria-hidden="true"></div>
+        <span class="cta-kicker">ПРЕДСКАЗАНИЕ — ЭТО КРАСИВО. А БИЛЕТ — ЕЩЁ ЛУЧШЕ.</span>
+        <h3>Хочешь превратить знак в реальный отпуск?</h3>
+        <p>Напиши, какая карта выпала. Я подберу варианты под даты, бюджет и твой характер.</p>
+        <a class="cta-link" href="https://instagram.com/tatakomotako" target="_blank" rel="noopener">Написать Tatakomotako <span>↗</span></a>
       </div>
     </section>
 
-    <section id="screen-saved" class="screen" aria-labelledby="saved-title">
+    <section id="screen-saved" class="screen">
       <div class="screen-head">
-        <button class="back-btn" data-action="home">←</button>
-        <div><div class="eyebrow">МОЯ КОЛЛЕКЦИЯ</div><h2 id="saved-title">Сохранённые карты</h2></div>
+        <button class="round-btn" data-action="home" aria-label="Назад">←</button>
+        <div><div class="eyebrow">МОИ ЗНАКИ</div><h2>Сохранённые карты</h2></div>
       </div>
       <div id="saved-list" class="saved-list"></div>
-      <button id="clear-saved" class="text-action danger hidden" data-action="clear-saved">Очистить сохранённое</button>
+      <button id="clear-saved" class="again-btn danger hidden" data-action="clear-saved">Очистить сохранённое</button>
     </section>
   </main>
 
-  <footer>НЕ ГАДАЙ — ЛЕТИ · TATAKOMOTAKO · <span id="year"></span></footer>
-
+  <footer><span>НЕ ГАДАЙ — ЛЕТИ</span><i>✦</i><span>TATAKOMOTAKO</span><i>✦</i><span id="year"></span></footer>
   <div id="toast" class="toast" role="status" aria-live="polite"></div>
 
-  <template id="card-template">
+  <template id="oracle-template">
     <article class="oracle-card">
-      <div class="card-top"><span class="card-number"></span><span class="card-type"></span></div>
-      <div class="card-symbol"></div>
-      <h3 class="card-title"></h3>
-      <p class="card-text"></p>
-      <div class="card-bottom">НЕ ГАДАЙ — ЛЕТИ <span>✦</span></div>
+      <div class="oracle-glow"></div>
+      <div class="oracle-top"><span class="oracle-position"></span><span class="oracle-symbol"></span></div>
+      <div class="oracle-main">
+        <p class="oracle-kicker">ТВОЁ ПРЕДСКАЗАНИЕ</p>
+        <h3 class="oracle-title"></h3>
+        <p class="oracle-prediction"></p>
+      </div>
+      <button class="meaning-toggle" type="button">Что это значит для тебя <span>↓</span></button>
+      <div class="oracle-details">
+        <div><span>Что это значит</span><p class="oracle-meaning"></p></div>
+        <div><span>Куда смотреть</span><p class="oracle-look"></p></div>
+        <div class="oracle-step-wrap"><span>Твой знак</span><p class="oracle-step"></p></div>
+      </div>
+      <div class="oracle-foot"><span>НЕ ГАДАЙ — ЛЕТИ</span><span>BY TATAKOMOTAKO</span></div>
     </article>
   </template>
 
-  <script src="./app.js" defer></script>
+  <script src="./app.js?v=20" defer></script>
 </body>
 </html>
