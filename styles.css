@@ -248,3 +248,22 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(
   .cta-links{grid-template-columns:1fr}
   .oracle-main{transform:translateY(-63px)}
 }
+
+/* v2.5 FINAL — production hardening */
+.spread-label{
+  font-size:11px;
+  letter-spacing:.13em;
+  color:var(--wine-dark);
+  overflow-wrap:anywhere;
+  word-break:break-word;
+}
+button:focus-visible,a:focus-visible,input:focus-visible{
+  outline:2px solid rgba(101,23,45,.62);
+  outline-offset:3px;
+}
+@media(min-width:720px){
+  .result-stage.multi .result-item:last-child:nth-child(odd){
+    grid-column:1 / -1;
+    justify-self:center;
+  }
+}

@@ -1,5 +1,16 @@
-const CACHE = 'ne-gaday-leti-v2';
-const CORE = ['./', './index.html', './styles.css', './app.js', './manifest.webmanifest', './icon.svg', './icon-192.png', './icon-512.png', './icon-maskable-512.png', './apple-touch-icon.png'];
+const CACHE = 'ne-gaday-leti-v25-final';
+const CORE = [
+  './',
+  './index.html',
+  './styles.css?v=25',
+  './app.js?v=25',
+  './manifest.webmanifest',
+  './icon.svg',
+  './icon-192.png',
+  './icon-512.png',
+  './icon-maskable-512.png',
+  './apple-touch-icon.png'
+];
 
 self.addEventListener('install', event => {
   event.waitUntil(
@@ -34,7 +45,9 @@ self.addEventListener('fetch', event => {
       .catch(async () => {
         const cached = await caches.match(event.request);
         if (cached) return cached;
-        if (event.request.mode === 'navigate') return caches.match('./index.html');
+        if (event.request.mode === 'navigate') {
+          return (await caches.match('./index.html')) || Response.error();
+        }
         return Response.error();
       })
   );

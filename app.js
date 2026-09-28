@@ -25,6 +25,9 @@ const shuffle=a=>{const out=[...a];for(let i=out.length-1;i>0;i--){const j=Math.
 function showScreen(id){$$('.screen').forEach(s=>s.classList.remove('active'));$('#screen-'+id).classList.add('active');window.scrollTo({top:0,behavior:'smooth'})}
 function toast(msg){const t=$('#toast');t.textContent=msg;t.classList.add('show');clearTimeout(toast.timer);toast.timer=setTimeout(()=>t.classList.remove('show'),1900)}
 function safeText(v){return String(v??'').replace(/[<>]/g,'')}
+function storageGet(key,fallback=null){try{const v=localStorage.getItem(key);return v===null?fallback:v}catch{return fallback}}
+function storageSet(key,value){try{localStorage.setItem(key,value);return true}catch{return false}}
+function storageRemove(key){try{localStorage.removeItem(key);return true}catch{return false}}
 function localDateKey(d=new Date()){return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`}
 function getCardById(id){return cards.find(c=>c.id===id)}
 function poolFor(type,used=new Set(),rareChance=0){
@@ -52,7 +55,7 @@ function chooseDeckCard(button){if(button.classList.contains('chosen'))return;$$
 function startSign(){startRitual({spec:[['Твой знак','any']],title:'Твой знак',eyebrow:'',kind:'sign',rareChance:.06})}
 function startSurprise(){startRitual({spec:[['Ответ, который пришёл первым','any']],title:'Сюрприз от оракула',eyebrow:'УДИВИ МЕНЯ',kind:'surprise',rareChance:.2,copy:'Не формулируй вопрос. Просто выбери карту, которая почему-то кажется твоей.'})}
 function startDaily(){
-  const date=localDateKey();let saved=null;try{saved=JSON.parse(localStorage.getItem('dailyCardV3')||'null')}catch{}
+  const date=localDateKey();let saved=null;try{saved=JSON.parse(storageGet('dailyCardV3','null'))}catch{}
   if(saved&&saved.date===date&&getCardById(saved.id)){const card=getCardById(saved.id);current={kind:'daily',mode:'daily',title:card.title,eyebrow:'ТВОЙ ЗНАК НА СЕГОДНЯ',items:[{position:'Карта дня',card}],meta:null};renderResult();return}
   startRitual({spec:[['Твоя карта дня','any']],title:'Карта дня',eyebrow:'ТВОЙ ЗНАК НА СЕГОДНЯ',kind:'daily',rareChance:.04,copy:'Одну карту. Один раз. До завтра она не меняется. Выбери ту, которая зовёт первой.'})
 }
@@ -77,6 +80,7 @@ function createOracleNode(item,index,total){
   const meaning=document.createElement('div');meaning.className='meaning-shell';
   const toggle=document.createElement('button');toggle.className='meaning-toggle';toggle.type='button';toggle.innerHTML='Что это значит для тебя <span>↓</span>';
   const details=document.createElement('div');details.className='oracle-details-panel';
+  const detailsId=`oracle-details-${index}-${item.card.id}`;details.id=detailsId;details.setAttribute('aria-hidden','true');toggle.setAttribute('aria-controls',detailsId);toggle.setAttribute('aria-expanded','false');
   const inner=document.createElement('div');inner.className='oracle-details-inner';
   const addDetail=(label,text,className='')=>{
     const block=document.createElement('div');if(className)block.className=className;
@@ -88,12 +92,12 @@ function createOracleNode(item,index,total){
   addDetail('Куда смотреть',item.card.look);
   addDetail('Твой знак',item.card.step,'oracle-step-wrap');
   details.appendChild(inner);meaning.append(toggle,details);
-  toggle.addEventListener('click',()=>meaning.classList.toggle('open'));
+  toggle.addEventListener('click',()=>{const open=meaning.classList.toggle('open');toggle.setAttribute('aria-expanded',String(open));details.setAttribute('aria-hidden',String(!open))});
   wrap.appendChild(meaning);
   return wrap
 }
 function renderResult(){
-  if(current.kind==='daily'){const card=current.items[0].card;localStorage.setItem('dailyCardV3',JSON.stringify({date:localDateKey(),id:card.id}));current.title=card.title}
+  if(current.kind==='daily'){const card=current.items[0].card;storageSet('dailyCardV3',JSON.stringify({date:localDateKey(),id:card.id}));current.title=card.title}
   $('#result-eyebrow').textContent=current.eyebrow;$('#result-title').textContent=current.title;$('#daily-lock').classList.toggle('hidden',current.kind!=='daily');
   $('#rare-banner').classList.toggle('hidden',!current.items.some(i=>i.card.type==='rare'));
   const stage=$('#result-stage');stage.innerHTML='';stage.className='result-stage'+(current.items.length>1?' multi':'');current.items.forEach((item,i)=>stage.appendChild(createOracleNode(item,i,current.items.length)));
@@ -101,14 +105,29 @@ function renderResult(){
 }
 function redraw(){if(current.kind==='daily')return;if(current.kind==='sign')return startSign();if(current.kind==='surprise')return startSurprise();if(current.kind==='compare')return startCompare(current.meta.a,current.meta.b);if(current.kind==='couple')return startCouple(current.meta.a,current.meta.b);return startMode(current.mode)}
 
-function savedCards(){try{return JSON.parse(localStorage.getItem('savedCardsV3')||'[]')}catch{return[]}}
-function saveCurrent(){const arr=savedCards();for(const item of current.items){if(!arr.some(x=>x.id===item.card.id))arr.push(item.card)}localStorage.setItem('savedCardsV3',JSON.stringify(arr));toast('Сохранено ♡')}
-function openSaved(){const arr=savedCards(),root=$('#saved-list');root.innerHTML='';if(!arr.length)root.innerHTML='<div class="empty">Пока пусто.<br>Сохраняй знаки, которые хочется оставить себе.</div>';arr.forEach(card=>{const el=document.createElement('div');el.className='saved-item';el.innerHTML=`<div class="saved-symbol">${card.symbol}</div><div><strong>${safeText(card.title)}</strong><small>${safeText(card.step)}</small></div><button class="delete-btn" aria-label="Удалить">×</button>`;el.querySelector('button').addEventListener('click',()=>{localStorage.setItem('savedCardsV3',JSON.stringify(savedCards().filter(x=>x.id!==card.id)));openSaved()});root.appendChild(el)});$('#clear-saved').classList.toggle('hidden',!arr.length);showScreen('saved')}
-function clearSaved(){localStorage.removeItem('savedCardsV3');openSaved();toast('Сохранённое очищено')}
+function savedCards(){try{return JSON.parse(storageGet('savedCardsV3','[]'))}catch{return[]}}
+function saveCurrent(){const arr=savedCards();for(const item of current.items){if(!arr.some(x=>x.id===item.card.id))arr.push(item.card)}if(storageSet('savedCardsV3',JSON.stringify(arr)))toast('Сохранено ♡');else toast('Не удалось сохранить на этом устройстве')}
+function openSaved(){const arr=savedCards(),root=$('#saved-list');root.innerHTML='';if(!arr.length)root.innerHTML='<div class="empty">Пока пусто.<br>Сохраняй знаки, которые хочется оставить себе.</div>';arr.forEach(card=>{const el=document.createElement('div');el.className='saved-item';el.innerHTML=`<div class="saved-symbol">${card.symbol}</div><div><strong>${safeText(card.title)}</strong><small>${safeText(card.step)}</small></div><button class="delete-btn" aria-label="Удалить">×</button>`;el.querySelector('button').addEventListener('click',()=>{storageSet('savedCardsV3',JSON.stringify(savedCards().filter(x=>x.id!==card.id)));openSaved()});root.appendChild(el)});$('#clear-saved').classList.toggle('hidden',!arr.length);showScreen('saved')}
+function clearSaved(){storageRemove('savedCardsV3');openSaved();toast('Сохранённое очищено')}
 
 async function shareCurrent(){const lines=['НЕ ГАДАЙ — ЛЕТИ · '+current.title,'',...current.items.flatMap(i=>[`${i.position}: ${i.card.title}`,i.card.prediction,'']), 'Тревел-оракул @tatakomotako'];const text=lines.join('\n');if(navigator.share){try{await navigator.share({title:'НЕ ГАДАЙ — ЛЕТИ',text,url:location.href});return}catch(e){if(e?.name==='AbortError')return}}try{await navigator.clipboard.writeText(text+'\n'+location.href);toast('Текст и ссылка скопированы')}catch{toast('Не удалось скопировать')}}
 function rounded(ctx,x,y,w,h,r){ctx.beginPath();if(ctx.roundRect)ctx.roundRect(x,y,w,h,r);else{ctx.moveTo(x+r,y);ctx.arcTo(x+w,y,x+w,y+h,r);ctx.arcTo(x+w,y+h,x,y+h,r);ctx.arcTo(x,y+h,x,y,r);ctx.arcTo(x,y,x+w,y,r);ctx.closePath()}}
-function wrap(ctx,text,x,y,maxWidth,lineHeight,maxLines=5){const words=String(text).split(/\s+/),lines=[];let line='';for(const word of words){const test=line?line+' '+word:word;if(ctx.measureText(test).width>maxWidth&&line){lines.push(line);line=word}else line=test}if(line)lines.push(line);const clipped=lines.length>maxLines;const shown=lines.slice(0,maxLines);if(clipped&&shown.length)shown[shown.length-1]=shown[shown.length-1].replace(/[.,;:]?$/,'')+'…';shown.forEach((ln,i)=>ctx.fillText(ln,x,y+i*lineHeight));return shown.length}
+function wrap(ctx,text,x,y,maxWidth,lineHeight,maxLines=5){
+  const raw=String(text??'').trim();if(!raw)return 0;
+  const words=raw.split(/\s+/),lines=[];let line='';
+  const chunks=[];
+  for(const word of words){
+    if(ctx.measureText(word).width<=maxWidth){chunks.push(word);continue}
+    let part='';
+    for(const ch of word){const test=part+ch;if(part&&ctx.measureText(test).width>maxWidth){chunks.push(part);part=ch}else part=test}
+    if(part)chunks.push(part);
+  }
+  for(const word of chunks){const test=line?line+' '+word:word;if(line&&ctx.measureText(test).width>maxWidth){lines.push(line);line=word}else line=test}
+  if(line)lines.push(line);
+  const clipped=lines.length>maxLines,shown=lines.slice(0,maxLines);
+  if(clipped&&shown.length)shown[shown.length-1]=shown[shown.length-1].replace(/[.,;:]?$/,'')+'…';
+  shown.forEach((ln,i)=>ctx.fillText(ln,x,y+i*lineHeight));return shown.length
+}
 function downloadStory(){
   const W=1080,H=1920,c=document.createElement('canvas');c.width=W;c.height=H;const x=c.getContext('2d');x.fillStyle='#f6f0e8';x.fillRect(0,0,W,H);
   const g=x.createRadialGradient(900,250,20,900,250,650);g.addColorStop(0,'rgba(101,23,45,.16)');g.addColorStop(1,'rgba(101,23,45,0)');x.fillStyle=g;x.fillRect(0,0,W,H);
@@ -118,9 +137,15 @@ function downloadStory(){
   x.fillStyle='#4c403f';x.font='35px Georgia';yy+=wrap(x,primary.card.prediction,76,yy,900,49,6)*49+42;
   x.strokeStyle='rgba(101,23,45,.18)';x.beginPath();x.moveTo(76,yy);x.lineTo(1004,yy);x.stroke();yy+=50;
   x.fillStyle='#65172d';x.font='700 19px Arial';x.fillText('ТВОЙ ЗНАК',76,yy);yy+=42;x.fillStyle='#45101f';x.font='31px Georgia';wrap(x,primary.card.step,76,yy,900,44,5);
-  if(current.items.length>1){let y=1320;x.fillStyle='#766c68';x.font='700 18px Arial';x.fillText('ОСТАЛЬНЫЕ КАРТЫ РАСКЛАДА',76,y);y+=42;for(const item of current.items.slice(1,4)){x.fillStyle='#65172d';x.font='700 18px Arial';x.fillText(item.position.toUpperCase(),76,y);x.fillStyle='#201a1a';x.font='30px Georgia';x.fillText(item.card.title,76,y+38);y+=104}}
-  x.fillStyle='#65172d';x.font='700 25px Arial';x.fillText('@tatakomotako',76,1828);x.fillStyle='#766c68';x.font='22px Arial';x.fillText('travel oracle',820,1828);
-  const a=document.createElement('a');a.download='ne-gaday-leti-2-story.png';a.href=c.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();toast('Сторис сохранена')
+  if(current.items.length>1){
+    let y=1235;x.fillStyle='#766c68';x.font='700 18px Arial';x.fillText('ОСТАЛЬНЫЕ КАРТЫ РАСКЛАДА',76,y);y+=38;
+    for(const item of current.items.slice(1,5)){
+      x.fillStyle='#65172d';x.font='700 17px Arial';const pLines=wrap(x,item.position.toUpperCase(),76,y,900,22,2);y+=pLines*22+8;
+      x.fillStyle='#201a1a';x.font='28px Georgia';const tLines=wrap(x,item.card.title,76,y,900,32,2);y+=tLines*32+22;
+    }
+  }
+  x.fillStyle='#65172d';x.font='700 25px Arial';x.fillText('@tatakomotako',76,1828);x.fillStyle='#766c68';x.font='22px Arial';x.fillText('Instagram · Telegram',760,1828);
+  const a=document.createElement('a');a.download='ne-gaday-leti-story.png';a.href=c.toDataURL('image/png');document.body.appendChild(a);a.click();a.remove();toast('Сторис сохранена')
 }
 
 function handleAction(action){if(action==='home')showScreen('home');if(action==='helper')showScreen('modes');if(action==='sign')startSign();if(action==='daily')startDaily();if(action==='surprise')startSurprise();if(action==='open-saved')openSaved();if(action==='save-current')saveCurrent();if(action==='share-current')shareCurrent();if(action==='download-current')downloadStory();if(action==='redraw')redraw();if(action==='clear-saved')clearSaved()}
