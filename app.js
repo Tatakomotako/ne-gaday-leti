@@ -68,7 +68,7 @@ function createOracleNode(item,index,total){
   const wrap=document.createElement('div');wrap.className='result-item';
   if(total>1){const label=document.createElement('div');label.className='spread-label';label.textContent=item.position;wrap.appendChild(label)}
   const node=$('#oracle-template').content.firstElementChild.cloneNode(true);if(item.card.type==='rare')node.classList.add('rare');
-  node.querySelector('.oracle-position').textContent=total===1?item.position:'ТВОЯ КАРТА';node.querySelector('.oracle-symbol').textContent=item.card.symbol;
+  node.querySelector('.oracle-position').textContent='';node.querySelector('.oracle-symbol').textContent=item.card.symbol;
   node.querySelector('.oracle-title').textContent=item.card.title;node.querySelector('.oracle-prediction').textContent=item.card.prediction;
   if(item.card.title.length>23)node.classList.add('long-title');
   if(item.card.prediction.length>118)node.classList.add('long-prediction');
