@@ -193,12 +193,15 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(
 }
 
 
-/* v2.3 — visual balance + social links */
+/* v2.4 — final oracle polish */
 .oracle-main{
-  transform:translateY(-36px);
+  transform:translateY(-74px);
 }
 .oracle-position:empty{
   visibility:hidden;
+}
+.result-head .eyebrow:empty{
+  display:none;
 }
 .oracle-prediction{
   line-height:1.52;
@@ -237,11 +240,11 @@ button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid rgba(
 @media(max-width:560px){
   .result-actions{grid-template-columns:repeat(3,minmax(0,1fr));gap:7px}
   .action-pill{padding:9px 4px;font-size:9.5px}
-  .oracle-main{transform:translateY(-32px)}
+  .oracle-main{transform:translateY(-70px)}
 }
 @media(max-width:370px){
   .result-actions{gap:5px}
   .action-pill{font-size:9px;padding:8px 3px}
   .cta-links{grid-template-columns:1fr}
-  .oracle-main{transform:translateY(-27px)}
+  .oracle-main{transform:translateY(-63px)}
 }
