@@ -68,9 +68,27 @@ function createOracleNode(item,index,total){
   const wrap=document.createElement('div');wrap.className='result-item';
   if(total>1){const label=document.createElement('div');label.className='spread-label';label.textContent=item.position;wrap.appendChild(label)}
   const node=$('#oracle-template').content.firstElementChild.cloneNode(true);if(item.card.type==='rare')node.classList.add('rare');
-  node.querySelector('.oracle-position').textContent=total===1?item.position:'ОТКРОЙ СМЫСЛ';node.querySelector('.oracle-symbol').textContent=item.card.symbol;
-  node.querySelector('.oracle-title').textContent=item.card.title;node.querySelector('.oracle-prediction').textContent=item.card.prediction;node.querySelector('.oracle-meaning').textContent=item.card.meaning;node.querySelector('.oracle-look').textContent=item.card.look;node.querySelector('.oracle-step').textContent=item.card.step;
-  node.querySelector('.meaning-toggle').addEventListener('click',()=>node.classList.toggle('open'));wrap.appendChild(node);return wrap
+  node.querySelector('.oracle-position').textContent=total===1?item.position:'ТВОЯ КАРТА';node.querySelector('.oracle-symbol').textContent=item.card.symbol;
+  node.querySelector('.oracle-title').textContent=item.card.title;node.querySelector('.oracle-prediction').textContent=item.card.prediction;
+  wrap.appendChild(node);
+
+  const meaning=document.createElement('div');meaning.className='meaning-shell';
+  const toggle=document.createElement('button');toggle.className='meaning-toggle';toggle.type='button';toggle.innerHTML='Что это значит для тебя <span>↓</span>';
+  const details=document.createElement('div');details.className='oracle-details-panel';
+  const inner=document.createElement('div');inner.className='oracle-details-inner';
+  const addDetail=(label,text,className='')=>{
+    const block=document.createElement('div');if(className)block.className=className;
+    const cap=document.createElement('span');cap.textContent=label;
+    const p=document.createElement('p');p.textContent=text;
+    block.append(cap,p);inner.appendChild(block);
+  };
+  addDetail('Что это значит',item.card.meaning);
+  addDetail('Куда смотреть',item.card.look);
+  addDetail('Твой знак',item.card.step,'oracle-step-wrap');
+  details.appendChild(inner);meaning.append(toggle,details);
+  toggle.addEventListener('click',()=>meaning.classList.toggle('open'));
+  wrap.appendChild(meaning);
+  return wrap
 }
 function renderResult(){
   if(current.kind==='daily'){const card=current.items[0].card;localStorage.setItem('dailyCardV3',JSON.stringify({date:localDateKey(),id:card.id}));current.title=card.title}
